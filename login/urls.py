@@ -32,5 +32,6 @@ urlpatterns = [
     path('captcha/', include('captcha.urls')),
     path('test/', views.UploadGoodsView.as_view()),
     path('upload/',views.upload),
+    path('changeInfo/', views.changeInfo),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
