@@ -1,6 +1,8 @@
 from django.shortcuts import render,redirect
 from . import models, forms
 from .util import *
+from django.views.generic import View
+from django.http import HttpResponse
 
 from django.contrib import messages
 # Create your views here.
@@ -18,12 +20,8 @@ def index(request):
    # obj = models.Goods.objects.get(pk=1)
     allgoods = models.Goods.objects.filter()
 
-    print(2)
     #goods={'name':obj.name,'seller':seller,'price':obj.price}
-    print(3)
-    
-    
-    
+
     if not request.session.get('is_login', None):
         return redirect('/login/')
     if request.session['user_type'] == 0:
@@ -31,7 +29,7 @@ def index(request):
     elif request.session['user_type'] == 1:
         return render(request,'user/base_sell.html',locals())
 
-    return render(request, 'user/index.html')
+    #return render(request, 'user/index.html')
 
 def login(request):
     if request.session.get('is_login',None):
@@ -132,9 +130,6 @@ def register(request):
     return render(request, 'user/register.html',locals())
 
 
-from django.views.generic import View
-from django.http import HttpResponse
-
 class UploadGoodsView(View):
     # 如果是GET请求，直接渲染到上传文件页面
     def get(self, request):
@@ -193,8 +188,6 @@ def upload(request):
             return redirect('/upload/')
     form = forms.Upload()
     return render(request, 'user/uploadgoods.html', locals())
-
-
 def changeInfo(request):
     #未登录 返回登陆界面
     if not request.session.get('is_login', None):
@@ -259,6 +252,11 @@ def changeInfo(request):
         
         form = forms.InfoForm(initial=dic)
         return render(request, 'user/changeInfo.html', locals())
+    
+def goodsInfo(request,id):
+    goods = models.Goods.objects.get(id=id)
+    return render(request,'goods/goodsInfo.html',locals())
+    
     
 
 

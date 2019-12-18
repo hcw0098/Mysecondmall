@@ -36,9 +36,9 @@ class User(models.Model):
 class Goods(models.Model):
     name = models.CharField(max_length=128)
     seller = models.ForeignKey('User',on_delete=models.CASCADE,blank=True,default='') #级联删除
-    price = models.FloatField(default=0,null=False)
-    img = models.ImageField(upload_to='goods_img',blank=True)
-    descrip = models.TextField(max_length=1024,default='',blank=True)##to do
+    price = models.FloatField(default=0, null=False)
+    img = models.ImageField(upload_to='goods_img')
+    descrip = models.TextField(max_length=1024,default='',blank=True)
 
     stats = ((0,'未售'),(1,'已售'),)
     state = models.SmallIntegerField(choices=stats,default=0)
@@ -46,7 +46,7 @@ class Goods(models.Model):
         (0,'服装'),
         (1,'电子产品'),
         (2,'书籍'),
-    )
+    ) ##todo
     type = models.SmallIntegerField(choices=types, default=0)
 
 
