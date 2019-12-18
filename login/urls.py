@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls import url
 ##app
 from secondmall import views
 
@@ -33,5 +34,6 @@ urlpatterns = [
     path('test/', views.UploadGoodsView.as_view()),
     path('upload/',views.upload),
     path('changeInfo/', views.changeInfo),
+    url(r'^goodsInfo/(\d+)/$', views.goodsInfo,name='goodsInfo'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

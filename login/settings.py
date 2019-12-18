@@ -71,6 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',
             ],
         },
     },
@@ -86,9 +87,9 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',   # 数据库引擎
-        'NAME': 'mall',  # 数据库名，先前创建的
+        'NAME': 'mysite2',  # 数据库名，先前创建的
         'USER': 'root',     # 用户名，可以自己创建用户
-        'PASSWORD': 'hcw1998HCW',  # 密码
+        'PASSWORD': 'hcw15045335430',  # 密码
         'HOST': '127.0.0.1',  # mysql服务所在的主机ip
         'PORT': '3306',         # mysql服务端口
     }
