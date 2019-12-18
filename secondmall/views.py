@@ -15,6 +15,15 @@ def hash_code(s,salt = 'mysite'):
 
 
 def index(request):
+   # obj = models.Goods.objects.get(pk=1)
+    allgoods = models.Goods.objects.filter()
+
+    print(2)
+    #goods={'name':obj.name,'seller':seller,'price':obj.price}
+    print(3)
+    
+    
+    
     if not request.session.get('is_login', None):
         return redirect('/login/')
     if request.session['user_type'] == 0:
@@ -40,7 +49,7 @@ def login(request):
                 message = '用户不存在！'
                 return render(request, 'user/login.html', locals())
 
-            if user.pwd == hash_code(password):
+            if user.pwd == password:
                 request.session['is_login'] = True
                 request.session['user_id'] = user.id
                 request.session['user_name'] = user.name
@@ -106,7 +115,8 @@ def register(request):
                     return render(request,'user/register.html',locals())
                 new_user = models.User()
                 new_user.name = username
-                new_user.pwd = hash_code(pwd1)
+                #new_user.pwd = hash_code(pwd1)
+                new_user.pwd = pwd1
                 new_user.email = email
                 new_user.sex = sex
                 new_user.type = type
@@ -189,15 +199,13 @@ def changeInfo(request):
     #未登录 返回登陆界面
     if not request.session.get('is_login', None):
         return redirect('/login/')
-    print(1)
+    #print(1)
 
     if request.method == 'POST':
-        print(2)
         form = forms.InfoForm(request.POST)
         message = '输入不合法！'
 
         if form.is_valid():
-            print('valid')
             username = form.cleaned_data.get('username')
             pwd1 = form.cleaned_data.get('password1')
             pwd2 = form.cleaned_data.get('password2')
@@ -215,14 +223,13 @@ def changeInfo(request):
                 message = '手机号格式错误！'
                 return render('/changeInfo/')
             else:
-                now_user = models.User.objects.filter(pk=request.session['user_id'])
-                same_user = models.User.objects.filter(name=username)-now_user
+                now_user = set(models.User.objects.filter(pk=request.session['user_id']))
+                same_user = set(models.User.objects.filter(name=username))-now_user
 
                 if same_user:
                     message = '用户名已存在！'
-                    print('name',username)
                     return render(request, 'user/changeInfo.html', locals())
-                same_email = models.User.objects.filter(email=email)-now_user
+                same_email = set(models.User.objects.filter(email=email))-now_user
                 if same_email:
                     message = '邮箱已存在！'
                     return render(request,'user/changeInfo.html',locals())
@@ -244,10 +251,15 @@ def changeInfo(request):
             message = '输入不合法！'
             print('invalid')
             return render(request, 'user/changeInfo.html', locals())
-    print('3')
-    form = forms.InfoForm()
-    return render(request, 'user/changeInfo.html', locals())
-
+    else:
+        ids = request.session['user_id']
+        now_user = models.User.objects.get(id=ids)
+        dic = {'username':now_user.name,'email':now_user.email,'phoneNumber':now_user.phoneNumber,'birth':now_user.birth,
+               'password1':now_user.pwd,'password2':now_user.pwd}
+        
+        form = forms.InfoForm(initial=dic)
+        return render(request, 'user/changeInfo.html', locals())
+    
 
 
 

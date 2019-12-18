@@ -42,7 +42,7 @@ class InfoForm(forms.Form):
     ))
     password1 = forms.CharField(label="密码", max_length=256,
                                 widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
-    password2 = forms.CharField(label="密码", max_length=256,
+    password2 = forms.CharField(label="确认密码", max_length=256,
                                 widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
 
     email = forms.EmailField(label="邮箱地址",
@@ -52,8 +52,9 @@ class InfoForm(forms.Form):
         attrs={'class': 'form-control', 'placeholder': "PhoneNumber"}
     ))
     years = tuple([str(x) for x in range(1900, 2020)])
-    birth = forms.DateField(label='出生日期', widget=forms.SelectDateWidget(years=years))  ## todo
+    birth = forms.DateField(label='出生日期', widget=forms.SelectDateWidget(years=years))
 
+    
 class ArticleForm(forms.ModelForm):
     class Meta:
         model = Article
@@ -85,7 +86,10 @@ class Upload(forms.ModelForm):
 
         }
 
-class UploadForm(forms.Form):
-    pass
-
+class ShowgoodsForm(forms.Form):
+    name = forms.CharField(label='商品名',max_length=128)
+    seller = forms.CharField(label='上传者',max_length=128)
+    price = forms.FloatField(label='价格')
+    
+    
 
