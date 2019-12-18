@@ -185,6 +185,71 @@ def upload(request):
     return render(request, 'user/uploadgoods.html', locals())
 
 
+def changeInfo(request):
+    #未登录 返回登陆界面
+    if not request.session.get('is_login', None):
+        return redirect('/login/')
+    print(1)
+
+    if request.method == 'POST':
+        print(2)
+        form = forms.InfoForm(request.POST)
+        message = '输入不合法！'
+
+        if form.is_valid():
+            print('valid')
+            username = form.cleaned_data.get('username')
+            pwd1 = form.cleaned_data.get('password1')
+            pwd2 = form.cleaned_data.get('password2')
+            email = form.cleaned_data.get('email')
+            birth = form.cleaned_data.get('birth')
+            phoneNumber = form.cleaned_data.get('phoneNumber')
+            # 检测输入密码是否一致
+            if pwd1!=pwd2:
+                message = '两次密码不同'
+                return render(request,'user/changeInfo.html',locals())
+            elif len(pwd1) == 0:
+                message = '密码不能为空！'
+                return redirect('/changeInfo/')
+            elif not judge_Monile_phone(phoneNumber):
+                message = '手机号格式错误！'
+                return render('/changeInfo/')
+            else:
+                now_user = models.User.objects.filter(pk=request.session['user_id'])
+                same_user = models.User.objects.filter(name=username)-now_user
+
+                if same_user:
+                    message = '用户名已存在！'
+                    print('name',username)
+                    return render(request, 'user/changeInfo.html', locals())
+                same_email = models.User.objects.filter(email=email)-now_user
+                if same_email:
+                    message = '邮箱已存在！'
+                    return render(request,'user/changeInfo.html',locals())
+                #print('change here!!!!!!')
+
+                new_user = models.User.objects.filter(pk=request.session['user_id'])[0]
+                #print('new_user!!!!!!!!',new_user)
+                new_user.name = username
+                new_user.pwd = hash_code(pwd1)
+                new_user.email = email
+                new_user.phoneNumber = phoneNumber
+                new_user.birth = birth
+                new_user.save()
+                request.session['user_name'] = username
+                #修改成功
+                return redirect('/index/')
+        # 注册表无效
+        else:
+            message = '输入不合法！'
+            print('invalid')
+            return render(request, 'user/changeInfo.html', locals())
+    print('3')
+    form = forms.InfoForm()
+    return render(request, 'user/changeInfo.html', locals())
+
+
+
 
 
 

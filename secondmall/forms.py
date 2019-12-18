@@ -36,6 +36,23 @@ class RegisterForm(forms.Form):
     years = tuple([str(x) for x in range(1900,2020)])
     birth = forms.DateField(label='出生日期',widget=forms.SelectDateWidget(years=years))## todo
 
+class InfoForm(forms.Form):
+    username = forms.CharField(label='用户名', max_length=128, widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': "Username"}
+    ))
+    password1 = forms.CharField(label="密码", max_length=256,
+                                widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
+    password2 = forms.CharField(label="密码", max_length=256,
+                                widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
+
+    email = forms.EmailField(label="邮箱地址",
+                             widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}))
+
+    phoneNumber = forms.CharField(label='电话号码', max_length=11, widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': "PhoneNumber"}
+    ))
+    years = tuple([str(x) for x in range(1900, 2020)])
+    birth = forms.DateField(label='出生日期', widget=forms.SelectDateWidget(years=years))  ## todo
 
 class ArticleForm(forms.ModelForm):
     class Meta:
