@@ -21,19 +21,30 @@ from secondmall import views
 
 from django.conf import settings
 from django.conf.urls.static import static
-
+from django.views.static import serve
+from login.settings import MEDIA_ROOT
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('index/', views.index),
     path('', views.index),
+    url(r'^media/(?P<path>.*)$', serve, {"document_root":MEDIA_ROOT}),
     path('login/', views.login),
     path('register/', views.register),
     path('logout/', views.logout),
     path('captcha/', include('captcha.urls')),
     path('test/', views.UploadGoodsView.as_view()),
     path('upload/',views.upload),
+    path('sell_record/', views.sell_record),
+    path('buy_record/', views.buy_record),
+    path('cart/', views.cart),
     path('changeInfo/', views.changeInfo),
     url(r'^goodsInfo/(\d+)/$', views.goodsInfo,name='goodsInfo'),
+    path('buy_goods/', views.buy_goods),
+    path('return_goods/', views.return_goods),
+    path('cart_goods/',views.cart_goods),
+    path('return_carts/',views.return_cart)
+    
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

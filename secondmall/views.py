@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render,redirect
 from . import models, forms
 from .util import *
@@ -9,6 +10,8 @@ from django.contrib import messages
 
 ##加密密码
 import hashlib
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 def hash_code(s,salt = 'mysite'):
     h = hashlib.sha256()
     s += salt
@@ -17,11 +20,7 @@ def hash_code(s,salt = 'mysite'):
 
 
 def index(request):
-   # obj = models.Goods.objects.get(pk=1)
     allgoods = models.Goods.objects.filter()
-
-    #goods={'name':obj.name,'seller':seller,'price':obj.price}
-
     if not request.session.get('is_login', None):
         return redirect('/login/')
     if request.session['user_type'] == 0:
@@ -147,40 +146,23 @@ class UploadGoodsView(View):
             # 打印错误信息
             print(form.errors.get_json_data())
             return HttpResponse("Fail")
-'''
-class Upload(View):
-    def get(self, request):
-        form = forms.Upload()
-        return render(request, 'user/uploadgoods.html',locals())
-    def post(self, request):
-        form = forms.Upload(request.POST, request.FILES)
-        # 将数据保存到数据库
-        if form.is_valid():
-            newgoods = form.save(commit=False)
-            seller = models.User.objects.get(pk=1)
-            newgoods.seller_id = 1
-            newgoods.save()
-            return HttpResponse("上传成功!")
-        else:
-            print(form.errors.get_json_data())
-            return HttpResponse("上传失败")
-'''
+
 def upload(request):
     #未登录无法上传
-
     if not request.session.get('is_login',None):
         #print('1 upload session')
         return redirect('/index/')
-
+    
     if request.method == 'POST':
         form = forms.Upload(request.POST, request.FILES)
         # 将数据保存到数据库
         if form.is_valid():
             newgoods = form.save(commit=False)
-            seller = models.User.objects.get(pk=1)
-            newgoods.seller_id = 1
+            seller = models.User.objects.get(pk=request.session.get('user_id'))
+            newgoods.seller_id = request.session.get('user_id')
             newgoods.save()
             #messages.success(request, "上传成功")
+            print('here!!')
             return redirect('/index/')
         else:
             print(form.errors.get_json_data())
@@ -188,6 +170,22 @@ def upload(request):
             return redirect('/upload/')
     form = forms.Upload()
     return render(request, 'user/uploadgoods.html', locals())
+
+def sell_record(request):
+    return render(request, 'user/sell_record.html', locals())
+
+def buy_record(request):
+    if not request.session.get('is_login',None):
+        return redirect('/login/')
+    buy_records = models.deal.objects.filter(buyer_id=request.session.get('user_id'))
+    return render(request, 'user/buy_record.html', locals())
+
+def cart(request):
+    if not request.session.get('is_login',None):
+        return redirect('/login/')
+    carts = models.cart.objects.filter(user_id=request.session.get('user_id'))
+    return render(request, 'user/cart.html', locals())
+
 def changeInfo(request):
     #未登录 返回登陆界面
     if not request.session.get('is_login', None):
@@ -256,6 +254,94 @@ def changeInfo(request):
 def goodsInfo(request,id):
     goods = models.Goods.objects.get(id=id)
     return render(request,'goods/goodsInfo.html',locals())
+
+@csrf_exempt
+def buy_goods(request):
+    if request.method == 'POST':
+        goods_id = request.POST.get('goods_id')
+        #print('goods_id',goods_id)
+        seller_id = request.POST.get('seller_id')
+        goods = models.Goods.objects.get(id=goods_id)
+        price = goods.price
+        # 已售出
+        if goods.state == 1:
+            #print('已售出')
+            return JsonResponse({'status': 200, 'message': '商品已出售'})
+        else:
+            buy = models.User.objects.get(id=request.session['user_id'])
+            # 创建交易记录
+            new_deal = models.deal.objects.create(
+                buyer_id=buy.id,
+                seller_id=seller_id,
+                goods_id=goods_id,
+                date=timezone.now(),
+                price=price,
+            )
+            new_deal.save()
+            goods.state = 1 #修改商品售出状态
+            goods.save()
+            return JsonResponse({'status': 200, 'message': '购买成功'})
+    return JsonResponse({'status': 200, 'message': '购买失败'})
+
+def return_goods(request):
+    #print('here!!!!')
+    if not request.session.get('is_login',None):
+        return redirect('/login/')
+    if request.method == "POST":
+        record_id = request.POST.get('record_id')
+        record = models.deal.objects.get(id=record_id)
+        goods = record.goods
+        goods.state = 0 #更改为未售
+        goods.save()
+        record.delete()
+        #print('成功删除！！！')
+        return redirect('/buy_record/')
+    return redirect('/buy_record/')
+
+def cart_goods(request):
+    if not request.session.get('is_login',None):
+        return redirect('/login/')
+    if request.method == "POST":
+        goods_id = request.POST.get('goods_id')
+        goods = models.Goods.objects.get(id=goods_id)
+        user_id = request.session.get('user_id')
+        res = models.cart.objects.filter(user_id=user_id,goods_id=goods_id)
+        if res:
+            messages.add_message(request, messages.INFO, '商品已在购物车中')
+            return render(request, 'goods/goodsInfo.html', locals())
+        else:
+            
+            models.cart.objects.create(
+                date=timezone.now(),
+                goods_id=goods_id,
+                user_id=user_id
+            )
+            messages.add_message(request, messages.INFO, '添加成功！')
+            return render(request,'goods/goodsInfo.html',locals())
+   # messages.add_message(request, messages.INFO, '添加失败！')
+    return render(request,'goods/goodsInfo.html',locals())
+
+def return_cart(request):
+    if not request.session.get('is_login',None):
+        return redirect('/login/')
+    if request.method == "POST":
+        cart_id = request.POST.get('cart_id')
+        cart_item = models.cart.objects.get(id=cart_id)
+        
+        cart_item.delete()
+        #print('成功删除！！！')
+        return redirect('/cart/')
+    return redirect('/cart/')
+    
+    
+        
+        
+        
+        
+    
+    
+
+        
     
     
 

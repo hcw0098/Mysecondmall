@@ -78,12 +78,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'login.wsgi.application'
-
+import pymysql         # 一定要添加这两行！
+pymysql.install_as_MySQLdb()
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-import pymysql
-pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',   # 数据库引擎
@@ -94,7 +93,6 @@ DATABASES = {
         'PORT': '3306',         # mysql服务端口
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators

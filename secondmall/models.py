@@ -41,7 +41,7 @@ class Goods(models.Model):
     descrip = models.TextField(max_length=1024,default='',blank=True)
 
     stats = ((0,'未售'),(1,'已售'),)
-    state = models.SmallIntegerField(choices=stats,default=0)
+    state = models.SmallIntegerField(choices=stats,default=0,blank=True)
     types = (
         (0,'服装'),
         (1,'电子产品'),
@@ -58,37 +58,39 @@ class Comments(models.Model):
     content = models.TextField()##to do
     date = models.DateField()
 
-#购物车，买方与货物的所属关系
-class Cart(models.Model):
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
-    goods = models.ForeignKey('Goods', on_delete=models.CASCADE)
-    date = models.DateField()
+
 
 #卖方对商品的所属关系
 class seller_have(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     goods = models.ForeignKey('Goods', on_delete=models.CASCADE)
     date = models.DateField()
-
-#买方对商品的所属关系
-class buyer_have(models.Model):
+"""
+#购物车，买方与货物的所属关系
+class cart(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     goods = models.ForeignKey('Goods', on_delete=models.CASCADE)
-    date = models.DateField()
+    date = models.DateTimeField()
+
+    class Meta:
+        unique_together = ('user', 'goods')
+    
+#买方对商品的所属关系
+class buy_record(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    goods = models.ForeignKey('Goods', on_delete=models.CASCADE)
+    date = models.DateTimeField()
+    
 
 #交易记录
+
 class deal(models.Model):
-    buyer = models.ForeignKey('User', on_delete=models.CASCADE)
-    seller = models.ForeignKey('User', on_delete=models.CASCADE)
+    buyer = models.ForeignKey('User', on_delete=models.CASCADE,related_name='buyer')
+    seller = models.ForeignKey('User', on_delete=models.CASCADE,related_name='seller')
     goods = models.ForeignKey('Goods', on_delete=models.CASCADE)
-    date = models.DateField()
+    date = models.DateTimeField()
     price = models.FloatField(default=0, null=False)
 
-
-
-
-
-"""
 
 
 class Article(models.Model):

@@ -13,6 +13,11 @@
   </head>
   <body>
     <div class="container">
+        <div class="container-left">
+            <img src="/static/user/image/logo.png" class="logo">
+            <p class="tip">登录</p>
+            <p>LOG IN</p>
+        </div>
             <div class="col">
                 <form class="form-login" action="/login/" method="post">
 
@@ -23,7 +28,7 @@
                 {% endif %}
 
                   {% csrf_token %}
-                  <h3 class="text-center">欢迎登录</h3>
+
 
                   <div class="form-group">
                     {{ login_form.username.label_tag }}
